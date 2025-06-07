@@ -1,2 +1,2 @@
-# Personality-Classifier
-A machine learning application that predicts personality traits from behavioral and demographic features using structured datasets and supervised learning algorithms.
+# SocialMediaVsProductivity
+A data analysis project exploring the relationship between social media usage patterns and productivity metrics through statistical analysis and machine learning techniques.
