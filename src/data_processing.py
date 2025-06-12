@@ -128,51 +128,56 @@ def one_hot_encode_nominal(X_train_nom, X_test_nom):
     
     return X_train_nom_encoded, X_test_nom_encoded
 
-def preproccess_num(X_train_num,X_test_num):
+def preproccess_num(X_train_num, X_test_num):
     """
     Scale specified features in the DataFrame.
     
     Parameters:
-    data (pd.DataFrame): The data containing features to scale.
-    columns (list): List of column names to scale.
+    X_train_num, X_test_num (pd.DataFrame): DataFrames with numerical features.
     
     Returns:
-    pd.DataFrame: DataFrame with scaled features.
+    pd.DataFrame: DataFrames with scaled and imputed features.
     """
     columns = [
-    'daily_social_media_time',
-    'perceived_productivity_score',
-    'stress_level',
-    'sleep_hours',
-    'screen_time_before_sleep',
-    'job_satisfaction_score'
-]
-
-    X_train_num= scaler.fit_transform(X_train_num)
-    X_test_num= scaler.transform(X_test_num)
+        'daily_social_media_time',
+        'perceived_productivity_score',
+        'stress_level',
+        'sleep_hours',
+        'screen_time_before_sleep',
+        'job_satisfaction_score'
+    ]
+    # Impute missing values first
     X_train_num[columns] = imputer.fit_transform(X_train_num[columns])
     X_test_num[columns] = imputer.transform(X_test_num[columns])
-    return X_train_num, X_test_num
-def preproccess_ord(X_train_ord,X_test_ord):
+    # Scale all numerical features
+    X_train_num_scaled = pd.DataFrame(scaler.fit_transform(X_train_num), columns=X_train_num.columns, index=X_train_num.index)
+    X_test_num_scaled = pd.DataFrame(scaler.transform(X_test_num), columns=X_test_num.columns, index=X_test_num.index)
+    return X_train_num_scaled, X_test_num_scaled
+def preproccess_ord(X_train_ord, X_test_ord):
     """
     Encode ordinal features in the DataFrame.
     
     Parameters:
-    data (pd.DataFrame): The data containing ordinal features to encode.
+    X_train_ord, X_test_ord (pd.DataFrame): DataFrames with ordinal features.
     
     Returns:
-    pd.DataFrame: DataFrame with encoded ordinal features.
+    pd.DataFrame: DataFrames with encoded ordinal features.
     """
     X_train_ord = X_train_ord.copy()
     X_test_ord = X_test_ord.copy()
-    
-    # Encode 'uses_focus_apps' and 'has_digital_wellbeing_enabled'
-    X_train_ord['uses_focus_apps'] = X_train_ord['uses_focus_apps'].map({'Yes': 1, 'No': 0})
-    X_test_ord['uses_focus_apps'] = X_test_ord['uses_focus_apps'].map({'Yes': 1, 'No': 0})
-    
-    X_train_ord['has_digital_wellbeing_enabled'] = X_train_ord['has_digital_wellbeing_enabled'].map({'Yes': 1, 'No': 0})
-    X_test_ord['has_digital_wellbeing_enabled'] = X_test_ord['has_digital_wellbeing_enabled'].map({'Yes': 1, 'No': 0})
-    
+
+    # Map boolean values directly for uses_focus_apps
+    X_train_ord['uses_focus_apps'] = X_train_ord['uses_focus_apps'].map({True: 1, False: 0})
+    X_test_ord['uses_focus_apps'] = X_test_ord['uses_focus_apps'].map({True: 1, False: 0})
+
+    # Try both boolean and string mapping for has_digital_wellbeing_enabled
+    if X_train_ord['has_digital_wellbeing_enabled'].dropna().isin([True, False]).all():
+        X_train_ord['has_digital_wellbeing_enabled'] = X_train_ord['has_digital_wellbeing_enabled'].map({True: 1, False: 0})
+        X_test_ord['has_digital_wellbeing_enabled'] = X_test_ord['has_digital_wellbeing_enabled'].map({True: 1, False: 0})
+    else:
+        X_train_ord['has_digital_wellbeing_enabled'] = X_train_ord['has_digital_wellbeing_enabled'].map({'Yes': 1, 'No': 0})
+        X_test_ord['has_digital_wellbeing_enabled'] = X_test_ord['has_digital_wellbeing_enabled'].map({'Yes': 1, 'No': 0})
+
     return X_train_ord, X_test_ord
 def combine_features(X_train_num, X_test_num, X_train_ord, X_test_ord, X_train_nom_encoded, X_test_nom_encoded):
     """
