@@ -216,7 +216,12 @@ elif page == "Modeling":
         from src import modeling
         model = joblib.load(model_path)
         st.success(f"Loaded {model_choice} model.")
-        st.write(model)
+        # Robustly display model class and parameters
+        st.write(f"Model: {type(model).__name__}")
+        try:
+            st.write("Parameters:", model.get_params())
+        except Exception as e:
+            st.info(f"Could not display model parameters: {e}")
         # Use modeling.py's evaluate_model (which loads X_test, y_test internally)
         metrics = modeling.evaluate_model(model)
         st.subheader('Test Set Metrics')
