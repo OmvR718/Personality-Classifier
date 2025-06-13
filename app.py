@@ -219,9 +219,10 @@ elif page == "Modeling":
         # Robustly display model class and parameters
         st.write(f"Model: {type(model).__name__}")
         try:
-            st.write("Parameters:", model.get_params())
+            params = model.get_params()
+            st.write("Parameters:", params)
         except Exception as e:
-            st.info(f"Could not display model parameters: {e}")
+            st.info(f"Could not display model parameters due to version mismatch or missing attributes. ({e})")
         # Use modeling.py's evaluate_model (which loads X_test, y_test internally)
         metrics = modeling.evaluate_model(model)
         st.subheader('Test Set Metrics')
