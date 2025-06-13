@@ -8,7 +8,7 @@ st.title("Social Media vs Productivity Dashboard")
 # Sidebar navigation
 page = st.sidebar.selectbox(
     "Choose a section",
-    ("Data Processing", "Exploratory Data Analysis", "Modeling")
+    ("Data Processing", "Exploratory Data Analysis")
 )
 
 if page == "Data Processing":
@@ -195,56 +195,3 @@ elif page == "Exploratory Data Analysis":
             st.pyplot(fig)
         else:
             st.info("Sleep vs stress split plot function not implemented.")
-
-elif page == "Modeling":
-    st.header("Modeling")
-    st.write("Select a model to load and evaluate:")
-    model_choice = st.selectbox("Choose a regression model", ["Linear Regression", "XGBoost", "LightGBM", "Decision Tree"])
-    model_path = None
-    if model_choice == "Linear Regression":
-        model_path = "models/linear_model.pkl"
-    elif model_choice == "XGBoost":
-        model_path = "models/xgb_model.pkl"
-    elif model_choice == "LightGBM":
-        model_path = "models/lgbm_model.pkl"
-    elif model_choice == "Decision Tree":
-        model_path = "models/decision_tree_model.pkl"
-
-    if model_path:
-        import joblib
-        import matplotlib.pyplot as plt
-        from src import modeling
-        model = joblib.load(model_path)
-        st.success(f"Loaded {model_choice} model.")
-        # Robustly display model class and parameters
-        st.write(f"Model: {type(model).__name__}")
-        try:
-            params = model.get_params()
-            st.write("Parameters:", params)
-        except Exception as e:
-            st.info(f"Could not display model parameters due to version mismatch or missing attributes. ({e})")
-        # Use modeling.py's evaluate_model (which loads X_test, y_test internally)
-        metrics = modeling.evaluate_model(model)
-        st.subheader('Test Set Metrics')
-        st.metric("MSE (Test)", f"{metrics['test']['mse']:.3f}")
-        st.metric("RMSE (Test)", f"{metrics['test']['rmse']:.3f}")
-        st.metric("R2 Score (Test)", f"{metrics['test']['r2']:.3f}")
-        st.subheader('Train Set Metrics')
-        st.metric("MSE (Train)", f"{metrics['train']['mse']:.3f}")
-        st.metric("RMSE (Train)", f"{metrics['train']['rmse']:.3f}")
-        st.metric("R2 Score (Train)", f"{metrics['train']['r2']:.3f}")
-
-        st.subheader("Residuals vs Predicted Values")
-        modeling.visualize_residuals(model)
-        st.pyplot(plt.gcf())
-
-        st.subheader("Feature Importance / Coefficients")
-        try:
-            modeling.plot_feature_importance(model)
-            st.pyplot(plt.gcf())
-        except Exception as e:
-            st.info(f"No feature importances or coefficients available. ({e})")
-
-        st.subheader("Actual vs Predicted Values")
-        modeling.visualize_predictions(model)
-        st.pyplot(plt.gcf())
